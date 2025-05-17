@@ -569,13 +569,19 @@
                     answer.className = 'answer';
                     answer.innerHTML = `<p><strong>Answer:</strong></p>${formatMarkdownContent(answers[i])}`;
                     questionCard.appendChild(questionNumber);
+                    questionCard.appendChild(questionText);
+                    questionCard.appendChild(answer);
 
                     questionsContainer.appendChild(questionCard);
+                }
 
-                // Apply Highlight.js to all code blocks
-                document.querySelectorAll('pre code').forEach((block) => {
+                    // Apply Highlight.js to all code blocks
+                   document.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightBlock(block);
-                });
+});
+}
+
+
             }
 
             function formatMarkdownContent(content) {
