@@ -549,7 +549,6 @@
                 practiceExercisesContent.innerHTML = formatMarkdownContent(data.practice_exercises_clean || data.practice_exercises);
                 practiceExercisesProcessContent.innerHTML = formatMarkdownContent(data.practice_exercises);
 
-
                 // Display questions
                 questionsContainer.innerHTML = '';
                 const questions = data.assessment.questions;
@@ -568,6 +567,7 @@
                     const answer = document.createElement('div');
                     answer.className = 'answer';
                     answer.innerHTML = `<p><strong>Answer:</strong></p>${formatMarkdownContent(answers[i])}`;
+
                     questionCard.appendChild(questionNumber);
                     questionCard.appendChild(questionText);
                     questionCard.appendChild(answer);
@@ -575,13 +575,10 @@
                     questionsContainer.appendChild(questionCard);
                 }
 
-                    // Apply Highlight.js to all code blocks
-                   document.querySelectorAll('pre code').forEach((block) => {
+                // Apply Highlight.js to all code blocks
+                document.querySelectorAll('pre code').forEach((block) => {
                     hljs.highlightBlock(block);
-});
-}
-
-
+                });
             }
 
             function formatMarkdownContent(content) {
