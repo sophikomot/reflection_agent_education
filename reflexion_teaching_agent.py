@@ -440,54 +440,39 @@ class ReflexionTeachingAgent:
         text_sample = text[:3000]
 
         # Create a prompt for practice exercises using ReAct and CoT
+        # Create a prompt for practice exercises using ReAct and CoT
         practice_prompt = f"""
-        Create 3 practical coding exercises in {language.upper()} based on the concepts in this lecture.
+               Create 3 practical coding exercises in {language.upper()} based on the concepts in this lecture.
 
-        Use the ReAct (Reasoning + Acting) approach:
+               Use the ReAct (Reasoning + Acting) approach:
 
-        Thought: First, identify key learning objectives from the lecture
-        Action: Design an exercise that tests understanding of these objectives
-        Thought: Consider what starter code would be helpful
-        Action: Create starter code that guides without giving away the solution
-        Thought: Develop a complete solution with step-by-step reasoning
-        Action: Provide a detailed explanation of the solution
+               Thought: First, identify key learning objectives from the lecture  
+               Action: Design an exercise that tests understanding of these objectives  
+               Thought: Consider what starter code would be helpful  
+               Action: Create starter code that guides without giving away the solution  
 
-        Lecture excerpt:
-        {text_sample}
+               Lecture excerpt:
+               {text_sample}
 
-        For each exercise:
-        1. Create a clear problem statement
-        2. Provide starter code when appropriate
-        3. Include a complete solution
-        4. Explain how the solution works using Chain-of-Thought reasoning
+               Format each exercise as:
 
-        Format each exercise as:
+               ## Exercise X: [Title]
 
-        ## Exercise X: [Title]
+               ### Problem
+               [Clear description of what to implement]
 
-        ### Problem
-        [Clear description of what to implement]
+              ### Starter Code
+              ```python
+              [Starter code if appropriate]
 
-        ### Starter Code
-        ```{language}
-        [Starter code if appropriate]
-        ```
+               (Do NOT include any solution or explanation)
+               """
 
-        ### Solution
-        ```{language}
-        [Complete solution code]
-        ```
-
-        ### Explanation
-        [Detailed explanation of the solution with step-by-step reasoning]
-        """
-
-        # System prompt for practice exercises
         system_prompt = f"""You are an expert {language} programming teacher creating educational exercises.
-        Use Chain-of-Thought reasoning to break down complex problems into understandable steps.
-        Your exercises should be challenging but achievable, building on concepts from the lecture.
-        Each exercise should include a clear problem statement, starter code, complete solution, and explanation.
-        Make sure the exercises progress in difficulty and cover different aspects of the lecture content."""
+               Use Chain-of-Thought reasoning to break down complex problems into understandable steps.
+               Your exercises should be challenging but achievable, building on concepts from the lecture.
+               Each exercise should include a clear problem statement and starter code.
+               Do NOT include any solutions or explanations in your response."""
 
         # Use reflexion to generate and improve the practice exercises
         return self.create_with_reflexion(practice_prompt, system_prompt)
