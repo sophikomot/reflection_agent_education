@@ -543,32 +543,92 @@
                 practiceExercisesContent.innerHTML = formatMarkdownContent(data.practice_exercises_clean || data.practice_exercises);
                 practiceExercisesProcessContent.innerHTML = formatMarkdownContent(data.practice_exercises);
 
-               // Вставить textarea только после Starter Code блока
+               //  Starter Code
+              // Insert textarea and submit button after each Starter Code block
                setTimeout(() => {
-               const practiceContainer = document.getElementById('practiceExercisesContent');
+                 const practiceContainer = document.getElementById('practiceExercisesContent');
                  if (!practiceContainer) return;
 
-                  const headers = practiceContainer.querySelectorAll('h4');
+                const headers = practiceContainer.querySelectorAll('h4');
 
-                  headers.forEach(header => {
-                     if (header.textContent.trim().toLowerCase().includes('starter code')) {
-                        let next = header.nextElementSibling;
-                        while (next && next.tagName.toLowerCase() !== 'pre') {
-                         next = next.nextElementSibling;
-                      }
-                        if (next) {
-                          const textarea = document.createElement('textarea');
-                           textarea.setAttribute('rows', '6');
-                           textarea.setAttribute('cols', '80');
-                           textarea.setAttribute('placeholder', 'Write your solution here...');
-                           textarea.className = 'user-answer';
-                           textarea.style.marginTop = '12px';
-                           textarea.style.display = 'block';
-                           next.parentNode.insertBefore(textarea, next.nextSibling);
+                headers.forEach(header => {
+                  if (header.textContent.trim().toLowerCase().includes('starter code')) {
+                    let next = header.nextElementSibling;
+                   while (next && next.tagName.toLowerCase() !== 'pre') {
+                     next = next.nextElementSibling;
+                   }
+
+                   if (next) {
+                     const textarea = document.createElement('textarea');
+                      textarea.setAttribute('rows', '6');
+                      textarea.setAttribute('cols', '80');
+                      textarea.setAttribute('placeholder', 'Write your solution here...');
+                      textarea.className = 'user-answer';
+                      textarea.style.marginTop = '12px';
+                      textarea.style.display = 'block';
+                      next.parentNode.insertBefore(textarea, next.nextSibling);
+
+                      const submitBtn = document.createElement('button');
+                      submitBtn.textContent = 'Submit the answer';
+                      submitBtn.style.marginTop = '8px';
+                      submitBtn.className = 'submit-answer-btn';
+
+                      submitBtn.onclick = async function () {
+                        const userCode = textarea.value.trim();
+                        const originalExercise = header.closest('.markdown-content').innerText.trim();
+                        const language = document.getElementById("languageSelect").value || "python";
+
+                        if (!userCode) {
+                          alert("Please enter your answer before submitting.");
+                          return;
                         }
-                     }
-                   });
-                }, 0);
+
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = "Loading solution...";
+
+                        try {
+                          const response = await fetch("http://localhost:8000/generate-solution/", {
+                             method: "POST",
+                             headers: { "Content-Type": "application/json" },
+                             body: JSON.stringify({
+                                original_exercise: originalExercise,
+                                user_code: userCode,
+                                language: language
+                             })
+                          });
+
+                          if (!response.ok) {
+                            throw new Error("Server error while generating solution.");
+                          }
+
+                          const data = await response.json();
+
+                          const solutionDiv = document.createElement("div");
+                          solutionDiv.className = "answer";
+                          solutionDiv.innerHTML = `
+                            <h4>Suggested Solution</h4>
+                            <pre><code class="language-${language}">${escapeHtml(data.solution || '')}</code></pre>
+                            <h4>Explanation</h4>
+                            <p>${data.explanation || "No explanation provided."}</p>
+                          `;
+
+                          textarea.parentNode.insertBefore(solutionDiv, submitBtn.nextSibling);
+                          hljs.highlightAll();
+                        } catch (err) {
+                          alert("Error getting solution. Please try again.");
+                          console.error(err);
+                        } finally {
+                          submitBtn.disabled = false;
+                          submitBtn.textContent = "Submit the answer";
+                        }
+                      };
+
+                      textarea.parentNode.insertBefore(submitBtn, textarea.nextSibling);
+            }
+        }
+    });
+}, 0);
+
 
 
                 // Apply Highlight.js to all code blocks

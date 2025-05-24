@@ -8,6 +8,8 @@ from tempfile import NamedTemporaryFile
 import shutil
 from typing import Dict, Any
 from dotenv import load_dotenv
+from pydantic import BaseModel
+
 
 # Load environment variables from .env file (for Google API key)
 load_dotenv()
@@ -43,6 +45,37 @@ except ValueError as e:
     print(f"Error initializing ReflexionTeachingAgent: {e}")
     print("The API will start, but endpoints requiring the agent will fail.")
     agent = None
+
+#  Define Pydantic request model for /generate-solution/
+
+class SolutionRequest(BaseModel):
+    original_exercise: str
+    user_code: str
+    language: str
+
+#Add POST endpoint to generate solution + explanation
+@app.post("/generate-solution/")
+async def generate_solution(request: SolutionRequest):
+    if agent is None:
+        raise HTTPException(status_code=500, detail="Agent not initialized")
+    print(f"Generating solution for language: {request.language}")
+    print(f"User submitted code:\n{request.user_code[:300]}")
+
+    try:
+        result = agent.generate_solution_after_user_attempt(
+            original_exercise=request.original_exercise,
+            user_code=request.user_code,
+            language=request.language
+        )
+
+        return {
+            "solution": result.split("### Explanation")[0].strip().replace("### Solution", "").strip(),
+            "explanation": result.split("### Explanation")[1].strip() if "### Explanation" in result else "No explanation provided."
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate solution: {str(e)}")
+
 
 
 @app.post("/process-lecture/", response_model=Dict[str, Any])

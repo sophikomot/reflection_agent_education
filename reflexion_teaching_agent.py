@@ -477,6 +477,99 @@ class ReflexionTeachingAgent:
         # Use reflexion to generate and improve the practice exercises
         return self.create_with_reflexion(practice_prompt, system_prompt)
 
+    def generate_exercise_without_solution(self, text: str, language: str) -> str:
+        """
+        Generate a single hands-on programming exercise with problem and starter code only.
+        """
+        text_sample = text[:3000]
+
+        prompt = f"""
+        Create 1 practical coding exercise in {language.upper()} based on the concepts in this lecture.
+
+        Use the ReAct (Reasoning + Acting) approach:
+
+        Thought: Identify a key learning objective from the lecture  
+        Action: Design an exercise to test understanding of that objective  
+        Thought: Consider what starter code would be helpful  
+        Action: Provide starter code that guides without giving away the solution  
+
+        Lecture excerpt:
+        {text_sample}
+
+        Format the output as:
+
+        ## Exercise: [Title]
+
+        ### Problem
+        [Clear description of what to implement]
+
+        ### Starter Code
+        ```{language}
+        [Starter code here]
+        ```
+
+        DO NOT include any solution, answer, or explanation.
+        """
+
+        system_prompt = f"""You are an expert {language} programming teacher creating educational exercises.
+    Use Chain-of-Thought reasoning to break down learning objectives into clear, structured problems.
+
+    Your responsibilities:
+    - Follow ReAct by alternating Thought and Action
+    - Create only the exercise and starter code
+    - Do NOT include any solution or answer
+    - Use proper markdown formatting
+    - Keep content focused, beginner-friendly, and goal-oriented
+    """
+
+        return self.create_with_reflexion(prompt, system_prompt)
+
+    def generate_solution_after_user_attempt(self, original_exercise: str, user_code: str, language: str) -> str:
+        """
+        Generate the correct solution and educational explanation after the student's attempt.
+        """
+        prompt = f"""
+        You are reviewing the following programming exercise and the student's attempt.
+
+        Exercise:
+        {original_exercise}
+
+        Student's attempt:
+        ```{language}
+        {user_code}
+        ```
+
+        Use Chain-of-Thought reasoning to:
+        1. Analyze the student’s approach
+        2. Identify correctness, gaps, or inefficiencies
+        3. Provide the ideal solution using best practices
+        4. Explain the solution clearly, step-by-step
+        5. Highlight any key differences between the solution and student’s attempt
+
+        Respond in this format:
+
+        ### Solution
+        ```{language}
+        [Correct solution code]
+        ```
+
+        ### Explanation
+        [Clear, structured explanation using step-by-step reasoning]
+        """
+
+        system_prompt = f"""You are a professional {language} programming educator and code reviewer.
+    Use Chain-of-Thought reasoning to evaluate a student's code and teach through example.
+
+    Follow this guidance:
+    - Be kind and constructive
+    - Provide a correct, idiomatic solution
+    - Use markdown formatting with headers and code blocks
+    - Explain clearly and compare with the student's approach when useful
+    - Avoid repeating the prompt unnecessarily
+    """
+
+        return self.create_with_reflexion(prompt, system_prompt)
+
     def create_assessment(self, text: str, language: str) -> Dict[str, Any]:
         """Generate assessment questions using Chain-of-Thought reasoning."""
         # Take a sample of the text to avoid token limits
