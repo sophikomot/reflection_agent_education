@@ -68,9 +68,24 @@ async def generate_solution(request: SolutionRequest):
             language=request.language
         )
 
+        import re
+        solution_part = result.split("### Explanation")[0].replace("### Solution", "").strip()
+        explanation_part = (
+            result.split("### Explanation")[1].strip()
+            if "### Explanation" in result else "No explanation provided."
+        )
+        # "Score: 4", "Score - 4/5" и т.п.
+        score_match = re.search(r'(?i)score\s*[:\-]?\s*(\d(?:\.0)?|\d\/5)', result)
+        if score_match:
+            raw_score = score_match.group(1)
+            score = int(raw_score.split("/")[0]) if "/" in raw_score else int(float(raw_score))
+        else:
+            score = None
+
         return {
-            "solution": result.split("### Explanation")[0].strip().replace("### Solution", "").strip(),
-            "explanation": result.split("### Explanation")[1].strip() if "### Explanation" in result else "No explanation provided."
+            "solution": solution_part,
+            "explanation": explanation_part,
+            "score": score
         }
 
     except Exception as e:

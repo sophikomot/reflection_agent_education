@@ -545,6 +545,7 @@ class ReflexionTeachingAgent:
         3. Provide the ideal solution using best practices
         4. Explain the solution clearly, step-by-step
         5. Highlight any key differences between the solution and student’s attempt
+        6. Finally, assign a score from 0 to 5 evaluating the quality of the student's solution (only an integer)
 
         Respond in this format:
 

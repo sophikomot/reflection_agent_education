@@ -290,7 +290,21 @@
         .show-process .content-process {
             display: block;
         }
-
+        .feedback-container {
+          background-color: #ffffff;
+         border-left: 4px solid #3498db;
+         padding: 16px;
+         margin-top: 20px;
+         border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .exercise-response-block {
+          margin-top: 16px;
+          padding: 12px;
+          background: #fff;
+          border: 1px solid #ddd;
+           border-radius: 8px;
+        }
         /* For print layout */
         @media print {
             body {
@@ -307,6 +321,17 @@
                 display: block !important;
                 box-shadow: none;
             }
+
+            .feedback-container {
+              display: block !important;
+              page-break-inside: avoid;
+              border: 1px solid #ccc;
+               padding: 12px;
+               margin: 20px 0;
+             background: #fff;
+              color: #000;
+             }
+
 
             pre {
                 border: 1px solid #ddd;
@@ -603,17 +628,21 @@
 
                           const data = await response.json();
 
-                          const solutionDiv = document.createElement("div");
-                          solutionDiv.className = "answer";
-                          solutionDiv.innerHTML = `
+                          const feedbackBlock = document.createElement("div");
+                          feedbackBlock.className = "feedback-container";
+                          feedbackBlock.innerHTML = `
+                           <div class="exercise-response-block">
                             <h4>Suggested Solution</h4>
                             <pre><code class="language-${language}">${escapeHtml(data.solution || '')}</code></pre>
                             <h4>Explanation</h4>
                             <p>${data.explanation || "No explanation provided."}</p>
-                          `;
+                            ${typeof data.score === "number" ? `<p><strong>Score:</strong> ${data.score}/5</p>` : ""}
+                             </div>
+                        `;
+                        submitBtn.parentNode.insertBefore(feedbackBlock, submitBtn.nextSibling);
 
-                          textarea.parentNode.insertBefore(solutionDiv, submitBtn.nextSibling);
-                          hljs.highlightAll();
+
+                           hljs.highlightAll();
                         } catch (err) {
                           alert("Error getting solution. Please try again.");
                           console.error(err);
